@@ -95,8 +95,12 @@ class BleScannerService : Service() {
             }
         }
 
-        scanner?.startScan(listOf(filter), settings, scanCallback!!)
-        Log.d("BLE", "BLE tarama başladı")
+        try {
+            scanner?.startScan(listOf(filter), settings, scanCallback!!)
+            Log.d("BLE", "BLE tarama başladı")
+        } catch (e: SecurityException) {
+            Log.e("BLE", "Bluetooth izni yok: ${e.message}")
+        }
     }
 
     private fun reportPresence(sessionId: String, checkinId: String) {
@@ -144,7 +148,11 @@ class BleScannerService : Service() {
     }
 
     override fun onDestroy() {
-        scanCallback?.let { scanner?.stopScan(it) }
+        try {
+            scanCallback?.let { scanner?.stopScan(it) }
+        } catch (e: SecurityException) {
+            Log.e("BLE", "stopScan izin hatası: ${e.message}")
+        }
         scope.cancel()
         super.onDestroy()
     }
