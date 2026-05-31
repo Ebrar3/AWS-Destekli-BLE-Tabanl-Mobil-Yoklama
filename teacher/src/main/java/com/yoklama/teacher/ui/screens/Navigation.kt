@@ -29,6 +29,9 @@ fun Navigation(viewModel: TeacherViewModel) {
                 onStartSession = {
                     navController.navigate("active_session")
                 },
+                onViewReport = { courseCode ->
+                    navController.navigate("report/$courseCode")
+                },
                 onLogout = {
                     viewModel.logout()
                     navController.navigate("login") {
@@ -43,8 +46,14 @@ fun Navigation(viewModel: TeacherViewModel) {
                 viewModel = viewModel,
                 onSessionEnded = {
                     val courseCode = viewModel.currentCourseCode ?: "BLM"
+                    viewModel.resetSession()
                     navController.navigate("report/$courseCode") {
                         popUpTo("active_session") { inclusive = true }
+                    }
+                },
+                onBack = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
                     }
                 }
             )

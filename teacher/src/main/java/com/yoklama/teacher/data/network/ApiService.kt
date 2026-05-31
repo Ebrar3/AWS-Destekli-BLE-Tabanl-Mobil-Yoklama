@@ -21,4 +21,7 @@ interface ApiService {
 
     @POST("get-session-report")
     suspend fun getSessionReport(@Body request: SessionReportRequest): Response<SessionReportResponse>
+
+    @POST("get-courses")
+    suspend fun getCourses(@Body request: GetCoursesRequest): Response<GetCoursesResponse>
 }

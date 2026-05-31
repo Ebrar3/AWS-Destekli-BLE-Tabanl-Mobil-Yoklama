@@ -64,3 +64,20 @@ data class SessionReportResponse(
     val total_sessions: Int?,
     val students: List<StudentReportItem>?
 )
+
+// Kurs modelleri
+data class GetCoursesRequest(
+    val teacher_id: String? = null,
+    val student_id: String? = null
+)
+
+data class CourseItem(
+    val course_code: String,
+    val course_name: String,
+    val teacher_id: String
+)
+
+data class GetCoursesResponse(
+    val success: Boolean,
+    val courses: List<CourseItem>?
+)

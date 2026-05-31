@@ -2,15 +2,19 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-      <SelectionState runConfigName="app">
+      <SelectionState runConfigName="teacher">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-29T15:21:04.182224600Z">
+        <DropdownSelection timestamp="2026-05-31T14:01:58.546643900Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CWA2H0ASM" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Monster\.android\avd\Pixel_4.avd" />
             </handle>
           </Target>
         </DropdownSelection>
+        <DialogSelection />
+      </SelectionState>
+      <SelectionState runConfigName="app">
+        <option name="selectionMode" value="DROPDOWN" />
         <DialogSelection />
       </SelectionState>
     </selectionStates>

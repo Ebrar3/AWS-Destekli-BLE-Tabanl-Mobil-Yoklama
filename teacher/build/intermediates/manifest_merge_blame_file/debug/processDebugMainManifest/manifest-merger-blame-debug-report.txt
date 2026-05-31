@@ -1,0 +1,202 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.yoklama.teacher"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="36" />
+10
+11    <!-- Internet -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:5:5-67
+12-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:5:22-64
+13
+14    <!-- BLE Advertise (Android 12+) -->
+15    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+15-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:8:5-78
+15-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:8:22-75
+16    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+16-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:9:5-76
+16-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:9:22-73
+17    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+17-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:10:5-73
+17-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:10:22-70
+18
+19    <!-- BLE (Android < 12) -->
+20    <uses-permission
+20-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:13:5-95
+21        android:name="android.permission.BLUETOOTH"
+21-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:13:22-65
+22        android:maxSdkVersion="30" />
+22-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:13:66-92
+23    <uses-permission
+23-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:14:5-101
+24        android:name="android.permission.BLUETOOTH_ADMIN"
+24-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:14:22-71
+25        android:maxSdkVersion="30" />
+25-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:14:72-98
+26    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+26-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:15:5-79
+26-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:15:22-76
+27    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+27-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:16:5-81
+27-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:16:22-78
+28
+29    <!-- Foreground Service -->
+30    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+30-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:19:5-77
+30-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:19:22-74
+31    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+31-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:20:5-94
+31-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:20:22-91
+32
+33    <uses-feature
+33-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:22:5-90
+34        android:name="android.hardware.bluetooth_le"
+34-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:22:19-63
+35        android:required="true" />
+35-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:22:64-87
+36
+37    <permission
+37-->[androidx.core:core:1.17.0] C:\Users\Monster\.gradle\caches\8.13\transforms\75529abbd3bb51de9fc8acbfeab1c794\transformed\core-1.17.0\AndroidManifest.xml:22:5-24:47
+38        android:name="com.yoklama.teacher.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+38-->[androidx.core:core:1.17.0] C:\Users\Monster\.gradle\caches\8.13\transforms\75529abbd3bb51de9fc8acbfeab1c794\transformed\core-1.17.0\AndroidManifest.xml:23:9-81
+39        android:protectionLevel="signature" />
+39-->[androidx.core:core:1.17.0] C:\Users\Monster\.gradle\caches\8.13\transforms\75529abbd3bb51de9fc8acbfeab1c794\transformed\core-1.17.0\AndroidManifest.xml:24:9-44
+40
+41    <uses-permission android:name="com.yoklama.teacher.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+41-->[androidx.core:core:1.17.0] C:\Users\Monster\.gradle\caches\8.13\transforms\75529abbd3bb51de9fc8acbfeab1c794\transformed\core-1.17.0\AndroidManifest.xml:26:5-97
+41-->[androidx.core:core:1.17.0] C:\Users\Monster\.gradle\caches\8.13\transforms\75529abbd3bb51de9fc8acbfeab1c794\transformed\core-1.17.0\AndroidManifest.xml:26:22-94
+42
+43    <application
+43-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:24:5-46:19
+44        android:allowBackup="true"
+44-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:25:9-35
+45        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+45-->[androidx.core:core:1.17.0] C:\Users\Monster\.gradle\caches\8.13\transforms\75529abbd3bb51de9fc8acbfeab1c794\transformed\core-1.17.0\AndroidManifest.xml:28:18-86
+46        android:debuggable="true"
+47        android:extractNativeLibs="false"
+48        android:icon="@mipmap/ic_launcher"
+48-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:26:9-43
+49        android:label="Yoklama Öğretmen"
+49-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:27:9-41
+50        android:roundIcon="@mipmap/ic_launcher_round"
+50-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:28:9-54
+51        android:supportsRtl="true"
+51-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:29:9-35
+52        android:testOnly="true"
+53        android:theme="@style/Theme.Teacher" >
+53-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:30:9-45
+54        <activity
+54-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:32:9-39:20
+55            android:name="com.yoklama.teacher.MainActivity"
+55-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:33:13-41
+56            android:exported="true" >
+56-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:34:13-36
+57            <intent-filter>
+57-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:35:13-38:29
+58                <action android:name="android.intent.action.MAIN" />
+58-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:36:17-69
+58-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:36:25-66
+59
+60                <category android:name="android.intent.category.LAUNCHER" />
+60-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:37:17-77
+60-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:37:27-74
+61            </intent-filter>
+62        </activity>
+63
+64        <service
+64-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:41:9-44:40
+65            android:name="com.yoklama.teacher.service.BleAdvertiserService"
+65-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:42:13-57
+66            android:exported="false"
+66-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:44:13-37
+67            android:foregroundServiceType="connectedDevice" />
+67-->C:\Documents\GitHub\B1\teacher\src\main\AndroidManifest.xml:43:13-60
+68
+69        <activity
+69-->[androidx.compose.ui:ui-tooling-android:1.9.0] C:\Users\Monster\.gradle\caches\8.13\transforms\70a7d5d5b2d2a5e1dc0a006aaad467cd\transformed\ui-tooling\AndroidManifest.xml:23:9-25:39
+70            android:name="androidx.compose.ui.tooling.PreviewActivity"
+70-->[androidx.compose.ui:ui-tooling-android:1.9.0] C:\Users\Monster\.gradle\caches\8.13\transforms\70a7d5d5b2d2a5e1dc0a006aaad467cd\transformed\ui-tooling\AndroidManifest.xml:24:13-71
+71            android:exported="true" />
+71-->[androidx.compose.ui:ui-tooling-android:1.9.0] C:\Users\Monster\.gradle\caches\8.13\transforms\70a7d5d5b2d2a5e1dc0a006aaad467cd\transformed\ui-tooling\AndroidManifest.xml:25:13-36
+72
+73        <provider
+73-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\5198fa18e187864dc0a14cc785ee1d9c\transformed\emoji2-1.4.0\AndroidManifest.xml:24:9-32:20
+74            android:name="androidx.startup.InitializationProvider"
+74-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\5198fa18e187864dc0a14cc785ee1d9c\transformed\emoji2-1.4.0\AndroidManifest.xml:25:13-67
+75            android:authorities="com.yoklama.teacher.androidx-startup"
+75-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\5198fa18e187864dc0a14cc785ee1d9c\transformed\emoji2-1.4.0\AndroidManifest.xml:26:13-68
+76            android:exported="false" >
+76-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\5198fa18e187864dc0a14cc785ee1d9c\transformed\emoji2-1.4.0\AndroidManifest.xml:27:13-37
+77            <meta-data
+77-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\5198fa18e187864dc0a14cc785ee1d9c\transformed\emoji2-1.4.0\AndroidManifest.xml:29:13-31:52
+78                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+78-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\5198fa18e187864dc0a14cc785ee1d9c\transformed\emoji2-1.4.0\AndroidManifest.xml:30:17-75
+79                android:value="androidx.startup" />
+79-->[androidx.emoji2:emoji2:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\5198fa18e187864dc0a14cc785ee1d9c\transformed\emoji2-1.4.0\AndroidManifest.xml:31:17-49
+80            <meta-data
+80-->[androidx.lifecycle:lifecycle-process:2.9.3] C:\Users\Monster\.gradle\caches\8.13\transforms\793206c417e780929b0f239670206df8\transformed\lifecycle-process-2.9.3\AndroidManifest.xml:29:13-31:52
+81                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+81-->[androidx.lifecycle:lifecycle-process:2.9.3] C:\Users\Monster\.gradle\caches\8.13\transforms\793206c417e780929b0f239670206df8\transformed\lifecycle-process-2.9.3\AndroidManifest.xml:30:17-78
+82                android:value="androidx.startup" />
+82-->[androidx.lifecycle:lifecycle-process:2.9.3] C:\Users\Monster\.gradle\caches\8.13\transforms\793206c417e780929b0f239670206df8\transformed\lifecycle-process-2.9.3\AndroidManifest.xml:31:17-49
+83            <meta-data
+83-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:29:13-31:52
+84                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+84-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:30:17-85
+85                android:value="androidx.startup" />
+85-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:31:17-49
+86        </provider>
+87
+88        <activity
+88-->[androidx.compose.ui:ui-test-manifest:1.9.0] C:\Users\Monster\.gradle\caches\8.13\transforms\b9c315258b63917ea20f7a7d271c2cf7\transformed\ui-test-manifest-1.9.0\AndroidManifest.xml:23:9-26:79
+89            android:name="androidx.activity.ComponentActivity"
+89-->[androidx.compose.ui:ui-test-manifest:1.9.0] C:\Users\Monster\.gradle\caches\8.13\transforms\b9c315258b63917ea20f7a7d271c2cf7\transformed\ui-test-manifest-1.9.0\AndroidManifest.xml:24:13-63
+90            android:exported="true"
+90-->[androidx.compose.ui:ui-test-manifest:1.9.0] C:\Users\Monster\.gradle\caches\8.13\transforms\b9c315258b63917ea20f7a7d271c2cf7\transformed\ui-test-manifest-1.9.0\AndroidManifest.xml:25:13-36
+91            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+91-->[androidx.compose.ui:ui-test-manifest:1.9.0] C:\Users\Monster\.gradle\caches\8.13\transforms\b9c315258b63917ea20f7a7d271c2cf7\transformed\ui-test-manifest-1.9.0\AndroidManifest.xml:26:13-76
+92
+93        <receiver
+93-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:34:9-52:20
+94            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+94-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:35:13-76
+95            android:directBootAware="false"
+95-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:36:13-44
+96            android:enabled="true"
+96-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:37:13-35
+97            android:exported="true"
+97-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:38:13-36
+98            android:permission="android.permission.DUMP" >
+98-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:39:13-57
+99            <intent-filter>
+99-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:40:13-42:29
+100                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+100-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:17-91
+100-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:41:25-88
+101            </intent-filter>
+102            <intent-filter>
+102-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:43:13-45:29
+103                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+103-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:17-85
+103-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:44:25-82
+104            </intent-filter>
+105            <intent-filter>
+105-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:46:13-48:29
+106                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+106-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:17-88
+106-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:47:25-85
+107            </intent-filter>
+108            <intent-filter>
+108-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:49:13-51:29
+109                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+109-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:17-95
+109-->[androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\Monster\.gradle\caches\8.13\transforms\f53ceb5a4e467d48466dde79e86da0ac\transformed\profileinstaller-1.4.0\AndroidManifest.xml:50:25-92
+110            </intent-filter>
+111        </receiver>
+112    </application>
+113
+114</manifest>

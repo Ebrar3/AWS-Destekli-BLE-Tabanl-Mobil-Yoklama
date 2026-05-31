@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BluetoothSearching
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
@@ -28,29 +29,31 @@ import kotlinx.coroutines.delay
 @Composable
 fun ActiveSessionScreen(
     viewModel: TeacherViewModel,
-    onSessionEnded: () -> Unit
+    onSessionEnded: () -> Unit,
+    onBack: () -> Unit
 ) {
     val checkinTriggered by viewModel.checkinTriggered.observeAsState()
     val sessionEnded     by viewModel.sessionEnded.observeAsState()
     val checkinCount     by viewModel.checkinCount.observeAsState(0)
     val errorMessage     by viewModel.errorMessage.observeAsState()
+    val courseName       = viewModel.currentCourseName ?: viewModel.currentCourseCode ?: "Ders"
 
-    // BLE yayını başlat — session başladıktan sonra ilk checkin gelince
+    // BLE'yi ilk checkin gelince başlat, sonraki yoklamalarda sadece payload güncellenir
     LaunchedEffect(checkinTriggered) {
         val cid = checkinTriggered?.checkin_id ?: return@LaunchedEffect
-        val sid = viewModel.currentSessionId ?: return@LaunchedEffect
+        val sid = viewModel.currentSessionId   ?: return@LaunchedEffect
         if (checkinCount == 1) {
-            // İlk yoklama — BLE yayını başlat ve otomatik döngüyü başlat
             viewModel.startBle(sid, cid)
             viewModel.startAutoCheckin()
         }
     }
 
+    // Ders bitince navigate et
     LaunchedEffect(sessionEnded) {
         if (sessionEnded?.success == true) onSessionEnded()
     }
 
-    // Countdown timer (8 dk = 480 sn)
+    // Geri sayım sayacı (her yeni yoklamada sıfırla)
     var remainingSecs by remember { mutableStateOf(480) }
     LaunchedEffect(checkinCount) {
         remainingSecs = 480
@@ -63,8 +66,8 @@ fun ActiveSessionScreen(
     // Pulse animasyonu
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f, targetValue = 1.15f,
-        animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
+        initialValue = 1f, targetValue = 1.12f,
+        animationSpec = infiniteRepeatable(tween(900), RepeatMode.Reverse),
         label = "pulseScale"
     )
 
@@ -74,12 +77,14 @@ fun ActiveSessionScreen(
         AlertDialog(
             onDismissRequest = { showEndDialog = false },
             title = { Text("Dersi Bitir?") },
-            text = { Text("$checkinCount yoklama tamamlandı. Dersi bitirip sonuçları hesaplamak istiyor musun?") },
+            text = {
+                Text("$checkinCount yoklama tamamlandı.\nDersi bitirip sonuçları hesaplamak istiyor musun?")
+            },
             confirmButton = {
                 Button(
                     onClick = { showEndDialog = false; viewModel.endSession() },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCF6679))
-                ) { Text("Bitir") }
+                ) { Text("Evet, Bitir") }
             },
             dismissButton = {
                 TextButton(onClick = { showEndDialog = false }) { Text("Vazgeç") }
@@ -90,47 +95,49 @@ fun ActiveSessionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Aktif Ders — ${viewModel.currentCourseCode}", fontWeight = FontWeight.Bold) },
+                title = {
+                    Column {
+                        Text(courseName, fontWeight = FontWeight.Bold)
+                        Text("Oturum: ${viewModel.currentSessionId ?: "—"}",
+                            fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Filled.ArrowBack, "Geri")
+                    }
+                },
                 actions = {
                     IconButton(onClick = { showEndDialog = true }) {
-                        Icon(Icons.Filled.Stop, contentDescription = "Bitir", tint = Color(0xFFCF6679))
+                        Icon(Icons.Filled.Stop, "Bitir", tint = Color(0xFFCF6679))
                     }
                 }
             )
         }
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // BLE Pulse göstergesi
+            // BLE göstergesi
             Box(
                 modifier = Modifier
-                    .size(140.dp)
+                    .size(130.dp)
                     .scale(pulseScale)
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        CircleShape
-                    ),
+                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Filled.BluetoothSearching,
-                    contentDescription = null,
-                    modifier = Modifier.size(72.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                Icon(Icons.Filled.BluetoothSearching, null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.primary)
             }
-            Spacer(Modifier.height(12.dp))
-            Text("Bluetooth Yayını Aktif", fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
+            Spacer(Modifier.height(8.dp))
+            Text("Bluetooth Yayını Aktif", fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary)
 
             Spacer(Modifier.height(20.dp))
 
-            // İstatistik kartları
+            // Sayaç kartları
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 StatCard("Yoklama", "$checkinCount", Modifier.weight(1f))
                 StatCard(
@@ -140,19 +147,21 @@ fun ActiveSessionScreen(
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             errorMessage?.let {
                 Text(it, color = MaterialTheme.colorScheme.error, fontSize = 13.sp)
                 Spacer(Modifier.height(8.dp))
             }
 
-            // Son yoklama sonuçları
+            // Ders sonu sonuçlar
             sessionEnded?.results?.let { results ->
-                Text("Sonuçlar", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(Modifier.height(8.dp))
+                Text("Sonuçlar (${results.size} öğrenci)",
+                    fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(Modifier.height(8.dp))
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    items(results) { student -> StudentResultCard(student) }
+                    items(results) { s -> StudentResultCard(s) }
                 }
             }
 
@@ -182,7 +191,7 @@ fun StatCard(label: String, value: String, modifier: Modifier = Modifier) {
         ) {
             Text(value, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.primary)
-            Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -191,10 +200,8 @@ fun StatCard(label: String, value: String, modifier: Modifier = Modifier) {
 fun StudentResultCard(student: StudentResult) {
     val color = if (student.status == "present") Color(0xFF4CAF50) else Color(0xFFCF6679)
     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp)) {
-        Row(
-            modifier = Modifier.padding(12.dp).fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(12.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(10.dp).background(color, CircleShape))
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
@@ -202,10 +209,8 @@ fun StudentResultCard(student: StudentResult) {
                 Text("${student.present_count}/${student.total_checkins} yoklama",
                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text("%%${student.percentage.toInt()}",
-                fontWeight = FontWeight.Bold,
-                color = color,
-                fontSize = 16.sp)
+            Text("%${student.percentage.toInt()}",
+                fontWeight = FontWeight.Bold, color = color, fontSize = 16.sp)
         }
     }
 }

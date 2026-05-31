@@ -24,6 +24,9 @@ class TeacherRepository {
     suspend fun getSessionReport(teacherId: String, courseCode: String): Response<SessionReportResponse> =
         api.getSessionReport(SessionReportRequest(teacherId, courseCode))
 
+    suspend fun getCoursesByTeacher(teacherId: String): Response<GetCoursesResponse> =
+        api.getCourses(GetCoursesRequest(teacher_id = teacherId))
+
     private fun hashSha256(input: String): String {
         val bytes = java.security.MessageDigest
             .getInstance("SHA-256")
