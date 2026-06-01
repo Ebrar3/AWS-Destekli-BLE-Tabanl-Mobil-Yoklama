@@ -52,6 +52,10 @@ fun Navigation(viewModel: TeacherViewModel) {
                     }
                 },
                 onBack = {
+                    // BLE ve session'u temizle
+                    viewModel.stopAutoCheckin()
+                    viewModel.stopBle()
+                    viewModel.resetSession()
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = true }
                     }

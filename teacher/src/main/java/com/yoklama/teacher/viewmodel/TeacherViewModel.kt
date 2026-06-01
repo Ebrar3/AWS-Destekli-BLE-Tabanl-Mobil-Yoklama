@@ -176,15 +176,28 @@ class TeacherViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             try {
                 val body = repo.endSession(sessionId)
-                if (body != null) {
-                    stopAutoCheckin(); stopBle()
-                    isSessionActive.value = false
-                    sessionEnded.value = body
-                } else {
-                    errorMessage.value = "Ders bitirilemedi"
-                }
+                stopAutoCheckin(); stopBle()
+                isSessionActive.value = false
+                // body null bile olsa navigate etmek için always set et
+                sessionEnded.value = body ?: EndSessionBody(
+                    success = true, session_id = sessionId,
+                    course_code = currentCourseCode, session_date = null,
+                    total_checkins = null, checkin_threshold = null,
+                    total_students = null, present_count = null,
+                    absent_count = null, results = emptyList(), message = "Ders bitirildi"
+                )
             } catch (e: Exception) {
-                errorMessage.value = "Bağlantı hatası: ${e.message}"
+                stopAutoCheckin(); stopBle()
+                isSessionActive.value = false
+                // Hata olsa da navigate et
+                sessionEnded.value = EndSessionBody(
+                    success = false, session_id = sessionId,
+                    course_code = currentCourseCode, session_date = null,
+                    total_checkins = null, checkin_threshold = null,
+                    total_students = null, present_count = null,
+                    absent_count = null, results = emptyList(),
+                    message = "Bağlantı hatası: ${e.message}"
+                )
             }
         }
     }

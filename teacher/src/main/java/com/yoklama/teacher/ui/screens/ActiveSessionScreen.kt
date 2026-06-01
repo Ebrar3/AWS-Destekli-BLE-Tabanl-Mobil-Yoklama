@@ -48,9 +48,9 @@ fun ActiveSessionScreen(
         }
     }
 
-    // Ders bitince navigate et
     LaunchedEffect(sessionEnded) {
-        if (sessionEnded?.success == true) onSessionEnded()
+        // Lambda başarısız olsa bile session bitti, navigate et
+        if (sessionEnded != null) onSessionEnded()
     }
 
     // Geri sayım sayacı (her yeni yoklamada sıfırla)
