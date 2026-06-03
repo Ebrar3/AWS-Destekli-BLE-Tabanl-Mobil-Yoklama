@@ -1,5 +1,7 @@
 package com.efecanseymen.b1.ui.screens
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
@@ -13,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Nfc
+import androidx.compose.material.icons.filled.SettingsBluetooth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -20,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,8 +35,18 @@ fun ClassScreen(
     viewModel: HomeViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context      = LocalContext.current
     val nfcData      by viewModel.nfcTagData.observeAsState()
-    val nfcAvailable by viewModel.nfcAvailable.observeAsState(false)
+    val nfcAvailable by viewModel.nfcAvailable.observeAsState(false)  // donanım var mı?
+    val nfcEnabled   by viewModel.nfcEnabled.observeAsState(false)    // açık mı?
+
+    // Durum: "no_hw" | "disabled" | "waiting" | "scanned"
+    val nfcState = when {
+        nfcData != null    -> "scanned"
+        !nfcAvailable      -> "no_hw"
+        !nfcEnabled        -> "disabled"
+        else               -> "waiting"
+    }
 
     // Halka animasyonu (NFC bekleme)
     val infiniteTransition = rememberInfiniteTransition(label = "nfc_rings")
@@ -57,9 +71,8 @@ fun ClassScreen(
         label = "r2a"
     )
 
-    // İkon pulse (kart okunduğunda)
     val successScale by animateFloatAsState(
-        targetValue = if (nfcData != null) 1.15f else 1f,
+        targetValue  = if (nfcState == "scanned") 1.15f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "success"
     )
@@ -76,7 +89,7 @@ fun ClassScreen(
             modifier = Modifier.padding(24.dp)
         ) {
 
-            // Başlık
+            // ─── BAŞLIK ───
             Text(
                 text = "Hangi Derslik?",
                 fontWeight = FontWeight.ExtraBold,
@@ -85,124 +98,154 @@ fun ClassScreen(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = if (nfcAvailable) "NFC kartını cihaza yaklaştır"
-                       else "Bu cihazda NFC desteklenmiyor",
+                text = when (nfcState) {
+                    "no_hw"    -> "Bu cihazda NFC donanımı yok"
+                    "disabled" -> "NFC kapalı — ayarlardan açın"
+                    "waiting"  -> "NFC kartını cihaza yaklaştır"
+                    else       -> "Derslik bilgisi okundu ✓"
+                },
                 fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = when (nfcState) {
+                    "disabled" -> Color(0xFFFFB74D)
+                    "scanned"  -> Color(0xFF4CAF50)
+                    else       -> MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 textAlign = TextAlign.Center
             )
 
             Spacer(Modifier.height(40.dp))
 
-            // NFC ikon + halkalar
+            // ─── İKON + HALKALAR ───
             Box(contentAlignment = Alignment.Center) {
-                if (nfcData == null && nfcAvailable) {
-                    // Yayılan halkalar
-                    listOf(ring1Scale to ring1Alpha, ring2Scale to ring2Alpha).forEach { (scale, alpha) ->
-                        Box(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .scale(scale)
-                                .border(
-                                    2.dp,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = alpha),
-                                    CircleShape
-                                )
-                        )
-                    }
+                // Yayılan halkalar (sadece NFC bekliyorken)
+                if (nfcState == "waiting") {
+                    listOf(ring1Scale to ring1Alpha, ring2Scale to ring2Alpha)
+                        .forEach { (scale, alpha) ->
+                            Box(
+                                modifier = Modifier
+                                    .size(120.dp)
+                                    .scale(scale)
+                                    .border(
+                                        2.dp,
+                                        MaterialTheme.colorScheme.primary.copy(alpha = alpha),
+                                        CircleShape
+                                    )
+                            )
+                        }
                 }
 
-                // Merkez ikon dairesi
+                // Merkez daire
                 Box(
                     modifier = Modifier
                         .size(120.dp)
                         .scale(successScale)
                         .background(
-                            color = if (nfcData != null)
-                                Color(0xFF4CAF50).copy(alpha = 0.15f)
-                            else
-                                MaterialTheme.colorScheme.primaryContainer,
+                            color = when (nfcState) {
+                                "scanned"  -> Color(0xFF4CAF50).copy(alpha = 0.15f)
+                                "disabled" -> Color(0xFFFFB74D).copy(alpha = 0.12f)
+                                "no_hw"    -> MaterialTheme.colorScheme.surfaceVariant
+                                else       -> MaterialTheme.colorScheme.primaryContainer
+                            },
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (nfcData != null) {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(56.dp),
-                            tint = Color(0xFF4CAF50)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Filled.Nfc,
-                            contentDescription = null,
-                            modifier = Modifier.size(56.dp),
-                            tint = if (nfcAvailable)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                        )
-                    }
+                    Icon(
+                        imageVector = when (nfcState) {
+                            "scanned"  -> Icons.Filled.CheckCircle
+                            "disabled" -> Icons.Filled.SettingsBluetooth
+                            else       -> Icons.Filled.Nfc
+                        },
+                        contentDescription = null,
+                        modifier = Modifier.size(56.dp),
+                        tint = when (nfcState) {
+                            "scanned"  -> Color(0xFF4CAF50)
+                            "disabled" -> Color(0xFFFFB74D)
+                            "no_hw"    -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            else       -> MaterialTheme.colorScheme.primary
+                        }
+                    )
                 }
             }
 
             Spacer(Modifier.height(36.dp))
 
-            // Kart okundu → sonuç göster
+            // ─── NFC KAPALI → AYARLAR BUTONU ───
+            AnimatedVisibility(visible = nfcState == "disabled") {
+                Button(
+                    onClick = {
+                        context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+                    },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFFB74D).copy(alpha = 0.85f)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "NFC Ayarlarını Aç",
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.Black
+                    )
+                }
+            }
+
+            // ─── KART OKUNDU → SONUÇ ───
             AnimatedVisibility(
-                visible = nfcData != null,
-                enter = fadeIn() + slideInVertically { it / 2 },
-                exit = fadeOut()
+                visible = nfcState == "scanned",
+                enter   = fadeIn() + slideInVertically { it / 2 },
+                exit    = fadeOut()
             ) {
                 nfcData?.let { data ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        elevation = CardDefaults.cardElevation(4.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                    Column {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape    = RoundedCornerShape(16.dp),
+                            colors   = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            ),
+                            elevation = CardDefaults.cardElevation(4.dp)
                         ) {
-                            Text(
-                                text = "📍 Derslik Bilgisi",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = data,
-                                fontSize = 26.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center
-                            )
+                            Column(
+                                modifier = Modifier.padding(20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    "📍 Derslik Bilgisi",
+                                    fontSize = 12.sp,
+                                    color    = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    text      = data,
+                                    fontSize  = 26.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color     = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
-                    }
 
-                    Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(12.dp))
 
-                    OutlinedButton(
-                        onClick = { viewModel.clearNfcTag() },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Temizle")
+                        OutlinedButton(
+                            onClick  = { viewModel.clearNfcTag() },
+                            shape    = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Temizle")
+                        }
                     }
                 }
             }
 
-            // Bekleme metni (kart okunmadıysa)
-            AnimatedVisibility(visible = nfcData == null && nfcAvailable) {
+            // ─── BEKLEME YAZISI ───
+            AnimatedVisibility(visible = nfcState == "waiting", enter = fadeIn(), exit = fadeOut()) {
                 Text(
-                    text = "Kart bekleniyor...",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    "Kart bekleniyor...",
+                    fontSize  = 14.sp,
+                    color     = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
             }

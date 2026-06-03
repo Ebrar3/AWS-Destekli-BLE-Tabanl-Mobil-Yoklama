@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="teacher">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-06-03T10:33:25.009493600Z">
+        <DropdownSelection timestamp="2026-06-03T11:12:16.538853200Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CWA2H0ASM" />
@@ -15,10 +15,10 @@
       </SelectionState>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-06-03T10:07:37.544010800Z">
+        <DropdownSelection timestamp="2026-06-03T11:12:39.281915200Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Monster\.android\avd\Pixel_4.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CWA2H0ASM" />
             </handle>
           </Target>
         </DropdownSelection>

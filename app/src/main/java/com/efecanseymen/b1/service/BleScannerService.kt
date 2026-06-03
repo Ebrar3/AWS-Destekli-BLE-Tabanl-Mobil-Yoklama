@@ -43,16 +43,18 @@ class BleScannerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         studentId = intent?.getStringExtra(EXTRA_STUDENT_ID) ?: ""
-        // Android 13+ bildirim izni kontrolü
+
+        // ÖNCE startForeground çağırılmalı — Android 5 saniye içinde beklediğini görürse crash yapar!
+        startForeground(NOTIF_ID, buildNotification("BLE Taranıyor..."))
+
+        // Bildirim izni kontrolü (Android 13+) — startForeground SONRASI güvenle stopSelf() yapılabilir
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
                     != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                // İzin yoksa servisi durdur — ScanScreen'den izin isteniyor
                 stopSelf()
                 return START_NOT_STICKY
             }
         }
-        startForeground(NOTIF_ID, buildNotification("BLE Taranıyor..."))
         startScanning()
         return START_STICKY
     }

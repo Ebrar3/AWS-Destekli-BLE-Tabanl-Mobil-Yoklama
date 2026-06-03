@@ -21,7 +21,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val presenceReported = MutableLiveData<String?>()
     val createUserResult = MutableLiveData<CreateUserResponse?>()
     val nfcTagData       = MutableLiveData<String?>()
-    val nfcAvailable     = MutableLiveData(false)
+    val nfcAvailable     = MutableLiveData(false)   // NFC donanımı var mı?
+    val nfcEnabled       = MutableLiveData(false)   // NFC açık mı? (ayarlardan)
 
     var currentUserId: String?   = null
     var currentUserName: String? = null

@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         viewModel.nfcAvailable.value = (nfcAdapter != null)
+        viewModel.nfcEnabled.value   = (nfcAdapter?.isEnabled == true)
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color(0xFF121212).toArgb()),
@@ -41,6 +42,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Kullanıcı ayarlardan NFC'yi açmış olabilir — her resume'de güncelle
+        viewModel.nfcEnabled.value = (nfcAdapter?.isEnabled == true)
         val intent = Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent, PendingIntent.FLAG_MUTABLE
