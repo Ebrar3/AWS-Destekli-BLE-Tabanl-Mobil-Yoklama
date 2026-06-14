@@ -4,6 +4,9 @@
     <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Bildirim (Android 13+) — Foreground Service için gerekli -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- BLE Advertise (Android 12+) -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />

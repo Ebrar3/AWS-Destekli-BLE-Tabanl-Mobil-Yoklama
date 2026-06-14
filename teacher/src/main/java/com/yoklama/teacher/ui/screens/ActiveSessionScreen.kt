@@ -48,10 +48,19 @@ fun ActiveSessionScreen(
     val presentStudents  by viewModel.presentStudents.observeAsState(emptyList())
     val courseName       = viewModel.currentCourseName ?: viewModel.currentCourseCode ?: "Ders"
 
-    // Android 12+ BLE yayın izinleri
-    val blePerms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+    // Android 12+ BLE yayın izinleri + Android 13+ bildirim izni
+    val blePerms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        arrayOf(
+            Manifest.permission.BLUETOOTH_ADVERTISE,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.POST_NOTIFICATIONS
+        )
+    else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
         arrayOf(Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.BLUETOOTH_CONNECT)
     else emptyArray()
+
+    // BLE başlatma durumu — tekrar tekrar başlatmayı önler
+    var bleStarted by remember { mutableStateOf(false) }
 
     val blePermLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -63,14 +72,18 @@ fun ActiveSessionScreen(
             viewModel.startBle(sid, cid)
             viewModel.startAutoCheckin()
             viewModel.startPollingPresent()
+            bleStarted = true
         }
     }
 
-    // BLE'yi ilk checkin gelince başlat — runtime izin kontrolüyle
-    LaunchedEffect(checkinTriggered) {
+    // BLE'yi başlat — ekran açıldığında veya yeni checkin geldiğinde
+    // NOT: HomeScreen'den navigate edildiğinde checkinTriggered zaten set edilmiş olabilir,
+    // bu yüzden sadece değişimi değil, mevcut değeri de kontrol ediyoruz.
+    LaunchedEffect(checkinTriggered, checkinCount) {
+        if (bleStarted) return@LaunchedEffect
         val cid = checkinTriggered?.checkin_id ?: return@LaunchedEffect
         val sid = viewModel.currentSessionId   ?: return@LaunchedEffect
-        if (checkinCount == 1) {
+        if (checkinCount >= 1) {
             val allGranted = blePerms.isEmpty() || blePerms.all {
                 ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
             }
@@ -78,6 +91,7 @@ fun ActiveSessionScreen(
                 viewModel.startBle(sid, cid)
                 viewModel.startAutoCheckin()
                 viewModel.startPollingPresent()
+                bleStarted = true
             } else {
                 blePermLauncher.launch(blePerms)
             }

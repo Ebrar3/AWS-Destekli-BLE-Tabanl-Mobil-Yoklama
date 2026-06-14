@@ -135,7 +135,11 @@ class TeacherViewModel(application: Application) : AndroidViewModel(application)
                     currentCheckinId = body.checkin_id
                     checkinCount.value = body.checkin_number ?: 0
                     checkinTriggered.value = body
-                    updateBleCheckin(body.checkin_id ?: "")
+                    // İlk yoklamada BLE'yi UI katmanı başlatıyor (ActiveSessionScreen).
+                    // Sonraki yoklamalarda mevcut yayını güncelle.
+                    if ((body.checkin_number ?: 0) > 1) {
+                        updateBleCheckin(body.checkin_id ?: "")
+                    }
                 }
             } catch (e: Exception) {
                 errorMessage.value = "Yoklama hatası: ${e.message}"
@@ -151,7 +155,9 @@ class TeacherViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun updateBleCheckin(checkinId: String) {
-        ctx.startService(Intent(ctx, BleAdvertiserService::class.java).apply {
+        // startForegroundService kullanıyoruz — servis zaten foreground'da
+        // olduğundan sorun çıkmaz, ama servis ölmüşse güvenli şekilde yeniden başlatır
+        ctx.startForegroundService(Intent(ctx, BleAdvertiserService::class.java).apply {
             action = BleAdvertiserService.ACTION_UPDATE_CHECKIN
             putExtra(BleAdvertiserService.EXTRA_CHECKIN_ID, checkinId)
         })
