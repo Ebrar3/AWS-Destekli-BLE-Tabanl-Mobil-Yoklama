@@ -69,7 +69,14 @@ fun ScanScreen(viewModel: HomeViewModel, modifier: Modifier) {
     }
 
     // İzin listesi
-    val permissions = if (Build.VERSION.SDK_INT >= 31)
+    val permissions = if (Build.VERSION.SDK_INT >= 33)
+        arrayOf(
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.POST_NOTIFICATIONS
+        )
+    else if (Build.VERSION.SDK_INT >= 31)
         arrayOf(
             Manifest.permission.BLUETOOTH_SCAN,
             Manifest.permission.BLUETOOTH_CONNECT,

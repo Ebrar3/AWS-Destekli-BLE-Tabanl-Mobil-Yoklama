@@ -43,65 +43,78 @@ class BleScannerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         studentId = intent?.getStringExtra(EXTRA_STUDENT_ID) ?: ""
+        Log.d("BLE", "=== BleScannerService onStartCommand === studentId=$studentId")
 
-        // ÖNCE startForeground çağırılmalı — Android 5 saniye içinde beklediğini görürse crash yapar!
+        // ÖNCE startForeground çağırılmalı
         startForeground(NOTIF_ID, buildNotification("BLE Taranıyor..."))
+        Log.d("BLE", "startForeground tamamlandı")
 
-        // Bildirim izni kontrolü (Android 13+) — startForeground SONRASI güvenle stopSelf() yapılabilir
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                stopSelf()
-                return START_NOT_STICKY
-            }
-        }
+        // POST_NOTIFICATIONS izni olmasa bile servis çalışmaya devam etmeli!
+        // Bildirim gözükmeyebilir ama BLE tarama çalışır.
         startScanning()
         return START_STICKY
     }
 
 
     private fun startScanning() {
-        val btManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        scanner = btManager.adapter.bluetoothLeScanner
-
-        val filter = ScanFilter.Builder()
-            .setServiceUuid(SERVICE_UUID)
-            .build()
-
-        val settings = ScanSettings.Builder()
-            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-            .build()
-
-        scanCallback = object : ScanCallback() {
-            override fun onScanResult(callbackType: Int, result: ScanResult?) {
-                result ?: return
-                val serviceData = result.scanRecord?.getServiceData(SERVICE_UUID) ?: return
-                val payload = String(serviceData, Charsets.UTF_8)
-                val parts = payload.split("|")
-                if (parts.size < 2) return
-
-                val sessionId = parts[0]
-                val checkinId = parts[1]
-
-                if (checkinId.isBlank() || checkinId in reportedCheckins) return
-                reportedCheckins.add(checkinId)
-
-                Log.d("BLE", "Öğretmen tespit edildi: $sessionId | $checkinId")
-                updateNotification("Yoklama tespit edildi! ✓")
-                reportPresence(sessionId, checkinId)
-            }
-
-            override fun onScanFailed(errorCode: Int) {
-                Log.e("BLE", "Tarama hatası: $errorCode")
-                updateNotification("Tarama hatası: $errorCode")
-            }
-        }
-
+        Log.d("BLE", "startScanning() çağrıldı")
         try {
+            val btManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val adapter = btManager.adapter
+            if (adapter == null) {
+                Log.e("BLE", "BluetoothAdapter NULL! BLE desteklenmiyor.")
+                return
+            }
+            if (!adapter.isEnabled) {
+                Log.e("BLE", "Bluetooth KAPALI!")
+                return
+            }
+            scanner = adapter.bluetoothLeScanner
+            if (scanner == null) {
+                Log.e("BLE", "BluetoothLeScanner NULL! BLE tarayıcı alınamadı.")
+                return
+            }
+            Log.d("BLE", "Scanner alındı, filtre ayarlanıyor...")
+
+            val filter = ScanFilter.Builder()
+                .setServiceUuid(SERVICE_UUID)
+                .build()
+
+            val settings = ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .build()
+
+            scanCallback = object : ScanCallback() {
+                override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                    result ?: return
+                    val serviceData = result.scanRecord?.getServiceData(SERVICE_UUID) ?: return
+                    val payload = String(serviceData, Charsets.UTF_8)
+                    val parts = payload.split("|")
+                    if (parts.size < 2) return
+
+                    val sessionId = parts[0]
+                    val checkinId = parts[1]
+
+                    if (checkinId.isBlank() || checkinId in reportedCheckins) return
+                    reportedCheckins.add(checkinId)
+
+                    Log.d("BLE", "✓ Öğretmen tespit edildi: session=$sessionId | checkin=$checkinId")
+                    updateNotification("Yoklama tespit edildi! ✓")
+                    reportPresence(sessionId, checkinId)
+                }
+
+                override fun onScanFailed(errorCode: Int) {
+                    Log.e("BLE", "✗ Tarama BAŞARISIZ! errorCode=$errorCode")
+                    updateNotification("Tarama hatası: $errorCode")
+                }
+            }
+
             scanner?.startScan(listOf(filter), settings, scanCallback!!)
-            Log.d("BLE", "BLE tarama başladı")
+            Log.d("BLE", "✓ BLE tarama BAŞLADI — UUID=${SERVICE_UUID.uuid}  Filtre aktif")
         } catch (e: SecurityException) {
-            Log.e("BLE", "Bluetooth izni yok: ${e.message}")
+            Log.e("BLE", "Bluetooth izni yok: ${e.message}", e)
+        } catch (e: Exception) {
+            Log.e("BLE", "startScanning HATA: ${e.message}", e)
         }
     }
 
