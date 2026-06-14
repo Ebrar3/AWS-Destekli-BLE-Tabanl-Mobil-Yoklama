@@ -230,13 +230,17 @@ class TeacherViewModel(application: Application) : AndroidViewModel(application)
         pollJob = viewModelScope.launch {
             while (isActive) {
                 val sid = currentSessionId ?: break
-                val cid = currentCheckinId          // null olabilir, Lambda opsiyonel kabul eder
+                val cid = currentCheckinId
                 try {
+                    android.util.Log.d("POLL", "→ getPresentStudents sid=$sid cid=$cid")
                     val body = repo.getPresentStudents(sid, cid)
+                    android.util.Log.d("POLL", "← success=${body?.success} count=${body?.present_count} students=${body?.students?.size}")
                     if (body?.success == true) {
                         presentStudents.value = body.students ?: emptyList()
                     }
-                } catch (_: Exception) { /* polling hatasını yoksay */ }
+                } catch (e: Exception) {
+                    android.util.Log.e("POLL", "Polling hatası: ${e.message}", e)
+                }
                 delay(5_000L)
             }
         }

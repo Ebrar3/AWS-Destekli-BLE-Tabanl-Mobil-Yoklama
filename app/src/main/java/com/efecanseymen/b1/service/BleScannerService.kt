@@ -108,13 +108,17 @@ class BleScannerService : Service() {
     private fun reportPresence(sessionId: String, checkinId: String) {
         scope.launch {
             try {
+                Log.d("BLE", "→ reportPresence çağrılıyor: student=$studentId, checkin=$checkinId, session=$sessionId")
                 val r = RetrofitInstance.api.reportPresence(
                     ReportPresenceRequest(studentId, checkinId, sessionId)
                 )
-                // LambdaWrapper içindeki body'yi ReportPresenceBody'ye parse et
-                val body = if (r.isSuccessful) r.body()?.parse(ReportPresenceBody::class.java) else null
+                Log.d("BLE", "← HTTP ${r.code()} | isSuccessful=${r.isSuccessful}")
+                val wrapper = r.body()
+                Log.d("BLE", "← LambdaWrapper: statusCode=${wrapper?.statusCode}, body=${wrapper?.body?.take(200)}")
+
+                val body = if (r.isSuccessful) wrapper?.parse(ReportPresenceBody::class.java) else null
                 val success = body?.success == true
-                Log.d("BLE", "Presence report: ${if (success) "başarılı" else "başarısız"}")
+                Log.d("BLE", "← Parsed: success=$success, body=$body")
 
                 // UI'a bildir
                 val broadcastIntent = Intent(ACTION_PRESENCE_REPORTED).apply {
@@ -125,7 +129,7 @@ class BleScannerService : Service() {
 
                 if (!success) reportedCheckins.remove(checkinId) // tekrar dene
             } catch (e: Exception) {
-                Log.e("BLE", "Presence hatası: ${e.message}")
+                Log.e("BLE", "Presence hatası: ${e.message}", e)
                 reportedCheckins.remove(checkinId)
             }
         }
