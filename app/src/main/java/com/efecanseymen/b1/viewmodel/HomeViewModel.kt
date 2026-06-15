@@ -23,6 +23,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val nfcTagData       = MutableLiveData<String?>()
     val nfcAvailable     = MutableLiveData(false)   // NFC donanımı var mı?
     val nfcEnabled       = MutableLiveData(false)   // NFC açık mı? (ayarlardan)
+    val isNfcReadingEnabled = MutableStateFlow(false) // Kullanıcı uygulamanın NFC okumasını istiyor mu?
+
+    val scanConnected    = MutableStateFlow(false)
+    val scanReportSuccess= MutableStateFlow<Boolean?>(null)
+    val scanServerMessage= MutableStateFlow<String?>(null)
+    val scanConnectedCid = MutableStateFlow<String?>(null)
 
     var currentUserId: String?   = null
     var currentUserName: String? = null

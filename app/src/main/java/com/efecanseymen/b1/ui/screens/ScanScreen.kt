@@ -50,11 +50,11 @@ fun ScanScreen(viewModel: HomeViewModel, modifier: Modifier) {
     val context = LocalContext.current
 
     // --- Durum ---
-    var isScanning    by remember { mutableStateOf(false) }
-    var isConnected   by remember { mutableStateOf(false) }
-    var reportSuccess by remember { mutableStateOf<Boolean?>(null) }
+    val isScanning    by viewModel.isScanning.collectAsState()
+    val isConnected   by viewModel.scanConnected.collectAsState()
+    val reportSuccess by viewModel.scanReportSuccess.collectAsState()
     var connectedCid  by remember { mutableStateOf<String?>(null) }
-    var serverMessage by remember { mutableStateOf<String?>(null) }
+    val serverMessage by viewModel.scanServerMessage.collectAsState()
 
     // BLE servisi broadcast'ini dinle
     DisposableEffect(Unit) {
@@ -65,21 +65,21 @@ fun ScanScreen(viewModel: HomeViewModel, modifier: Modifier) {
                     val sid     = intent.getStringExtra(BleScannerService.EXTRA_SESSION_ID)
                     val msg     = intent.getStringExtra(BleScannerService.EXTRA_MESSAGE)
                     val success = intent.getBooleanExtra(BleScannerService.EXTRA_STATUS, false)
-                    connectedCid  = cid
-                    reportSuccess = success
+                    viewModel.scanConnectedCid.value = cid
+                    viewModel.scanReportSuccess.value = success
                     if (success) {
-                        isConnected = true
+                        viewModel.scanConnected.value = true
                         
                         // API'den mesaj geldiyse onu, yoksa sessionId içinden ders kodunu bulmaya çalışalım
                         if (!msg.isNullOrBlank()) {
-                            serverMessage = msg
+                            viewModel.scanServerMessage.value = msg
                         } else if (!sid.isNullOrBlank()) {
                             val courses = viewModel.courses.value ?: emptyList()
                             val matchedCourse = courses.find { sid.contains(it.course_code, ignoreCase = true) }
-                            serverMessage = matchedCourse?.course_name?.let { "$it Yoklamasına Katıldınız" }
+                            viewModel.scanServerMessage.value = matchedCourse?.course_name?.let { "$it Yoklamasına Katıldınız" }
                                 ?: "Yoklamaya Katıldın! ✓"
                         } else {
-                            serverMessage = "Yoklamaya Katıldın! ✓"
+                            viewModel.scanServerMessage.value = "Yoklamaya Katıldın! ✓"
                         }
                     }
                 }
@@ -105,7 +105,7 @@ fun ScanScreen(viewModel: HomeViewModel, modifier: Modifier) {
     ) { granted ->
         if (granted.values.all { it }) {
             startBleService(context, viewModel)
-            isScanning = true
+            viewModel.startScan()
         }
     }
 
@@ -252,14 +252,14 @@ fun ScanScreen(viewModel: HomeViewModel, modifier: Modifier) {
                     .clickable(enabled = !isConnected) {
                         if (isScanning) {
                             context.stopService(Intent(context, BleScannerService::class.java))
-                            isScanning = false
+                            viewModel.stopScan()
                         } else {
                             val allGranted = permissions.all {
                                 ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
                             }
                             if (allGranted) {
                                 startBleService(context, viewModel)
-                                isScanning = true
+                                viewModel.startScan()
                             } else {
                                 permLauncher.launch(permissions)
                             }

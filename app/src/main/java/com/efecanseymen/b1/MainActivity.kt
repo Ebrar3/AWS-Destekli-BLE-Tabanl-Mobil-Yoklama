@@ -14,20 +14,54 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.IntentFilter
+import android.bluetooth.BluetoothAdapter
 import com.efecanseymen.b1.ui.screens.Navigation
 import com.efecanseymen.b1.ui.theme.B1Theme
 import com.efecanseymen.b1.viewmodel.HomeViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: HomeViewModel by viewModels()
     private var nfcAdapter: NfcAdapter? = null
 
+    private val bluetoothStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+                if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_TURNING_OFF) {
+                    viewModel.scanConnected.value = false
+                    viewModel.scanReportSuccess.value = null
+                    viewModel.scanServerMessage.value = null
+                    viewModel.stopScan()
+                    context?.stopService(Intent(context, com.efecanseymen.b1.service.BleScannerService::class.java))
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         viewModel.nfcAvailable.value = (nfcAdapter != null)
         viewModel.nfcEnabled.value   = (nfcAdapter?.isEnabled == true)
+
+        val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        registerReceiver(bluetoothStateReceiver, filter)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.isNfcReadingEnabled.collect { enabled ->
+                    if (enabled) enableNfcDispatch() else disableNfcDispatch()
+                }
+            }
+        }
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color(0xFF121212).toArgb()),
@@ -40,10 +74,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(bluetoothStateReceiver)
+    }
+
     override fun onResume() {
         super.onResume()
-        // Kullanıcı ayarlardan NFC'yi açmış olabilir — her resume'de güncelle
         viewModel.nfcEnabled.value = (nfcAdapter?.isEnabled == true)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        disableNfcDispatch()
+    }
+
+    private fun enableNfcDispatch() {
         val intent = Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent, PendingIntent.FLAG_MUTABLE
@@ -51,8 +97,7 @@ class MainActivity : ComponentActivity() {
         nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, null)
     }
 
-    override fun onPause() {
-        super.onPause()
+    private fun disableNfcDispatch() {
         nfcAdapter?.disableForegroundDispatch(this)
     }
 

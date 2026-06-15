@@ -9,6 +9,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -96,12 +98,15 @@ fun ClassScreen(
     val nfcAvailable by viewModel.nfcAvailable.observeAsState(false)  // donanım var mı?
     val nfcEnabled   by viewModel.nfcEnabled.observeAsState(false)    // açık mı?
 
-    // Durum: "no_hw" | "disabled" | "waiting" | "scanned"
+    val isNfcReadingEnabled by viewModel.isNfcReadingEnabled.collectAsState()
+
+    // Durum: "no_hw" | "disabled" | "app_disabled" | "waiting" | "scanned"
     val nfcState = when {
-        nfcData != null    -> "scanned"
-        !nfcAvailable      -> "no_hw"
-        !nfcEnabled        -> "disabled"
-        else               -> "waiting"
+        nfcData != null      -> "scanned"
+        !nfcAvailable        -> "no_hw"
+        !nfcEnabled          -> "disabled"
+        !isNfcReadingEnabled -> "app_disabled"
+        else                 -> "waiting"
     }
 
     // NFC verisini parse et ve bugüne göre filtrele
@@ -170,30 +175,33 @@ fun ClassScreen(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = when (nfcState) {
-                        "no_hw"    -> "Bu cihazda NFC donanımı yok"
-                        "disabled" -> "NFC kapalı — ayarlardan açın"
-                        else       -> "NFC kartını cihaza yaklaştır"
+                        "no_hw"        -> "Bu cihazda NFC donanımı yok"
+                        "disabled"     -> "NFC kapalı — ayarlardan açın"
+                        "app_disabled" -> "NFC kapalı"
+                        else           -> "NFC kartını cihaza yaklaştır"
                     },
                     fontSize = 14.sp,
                     color = when (nfcState) {
-                        "disabled" -> Color(0xFFFFB74D)
-                        else       -> MaterialTheme.colorScheme.onSurfaceVariant
+                        "disabled", "app_disabled" -> Color(0xFFFFB74D)
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
                     },
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(Modifier.height(48.dp))
+
+
+                Spacer(Modifier.height(32.dp))
 
                 // İkon + Halkalar
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(160.dp)
+                    modifier = Modifier.size(260.dp)
                 ) {
                     if (nfcState == "waiting") {
                         Box(
                             modifier = Modifier
-                                .size(160.dp)
+                                .size(200.dp)
                                 .graphicsLayer {
                                     scaleX = ring1Scale; scaleY = ring1Scale; alpha = ring1Alpha
                                 }
@@ -201,7 +209,7 @@ fun ClassScreen(
                         )
                         Box(
                             modifier = Modifier
-                                .size(160.dp)
+                                .size(200.dp)
                                 .graphicsLayer {
                                     scaleX = ring2Scale; scaleY = ring2Scale; alpha = ring2Alpha
                                 }
@@ -209,32 +217,44 @@ fun ClassScreen(
                         )
                     }
 
-                    Box(
+                    val interactionSource = remember { MutableInteractionSource() }
+                    val isPressed by interactionSource.collectIsPressedAsState()
+                    val baseScale = if (nfcState == "waiting" || nfcState == "scanned") 1f else 0.75f
+                    val buttonScale by animateFloatAsState(
+                        targetValue = if (isPressed) baseScale * 1.25f else baseScale,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                        label = "nfc_button_scale"
+                    )
+
+                    Surface(
                         modifier = Modifier
-                            .size(120.dp)
-                            .background(
-                                color = when (nfcState) {
-                                    "disabled" -> Color(0xFFFFB74D).copy(alpha = 0.12f)
-                                    "no_hw"    -> MaterialTheme.colorScheme.surfaceVariant
-                                    else       -> MaterialTheme.colorScheme.primaryContainer
-                                },
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = when (nfcState) {
-                                "disabled" -> Icons.Filled.SettingsBluetooth
-                                else       -> Icons.Filled.Nfc
-                            },
-                            contentDescription = null,
-                            modifier = Modifier.size(56.dp),
-                            tint = when (nfcState) {
-                                "disabled" -> Color(0xFFFFB74D)
-                                "no_hw"    -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                                else       -> MaterialTheme.colorScheme.primary
+                            .size(200.dp)
+                            .scale(buttonScale),
+                        shape = RoundedCornerShape(20),
+                        interactionSource = interactionSource,
+                        color = when (nfcState) {
+                            "disabled", "app_disabled" -> Color(0xFFFFB74D).copy(alpha = 0.12f)
+                            "no_hw"                    -> MaterialTheme.colorScheme.surfaceVariant
+                            else                       -> MaterialTheme.colorScheme.primaryContainer
+                        },
+                        onClick = {
+                            if (nfcAvailable && nfcEnabled && nfcState != "scanned") {
+                                viewModel.isNfcReadingEnabled.value = !isNfcReadingEnabled
                             }
-                        )
+                        }
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Filled.Nfc,
+                                contentDescription = "NFC Toggle",
+                                modifier = Modifier.size(100.dp),
+                                tint = when (nfcState) {
+                                    "disabled", "app_disabled" -> Color(0xFFFFB74D)
+                                    "no_hw"                    -> MaterialTheme.colorScheme.onSurfaceVariant
+                                    else                       -> MaterialTheme.colorScheme.primary
+                                }
+                            )
+                        }
                     }
                 }
 
@@ -248,22 +268,27 @@ fun ClassScreen(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFFFFB74D).copy(alpha = 0.85f)
                         ),
-                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Text("NFC Ayarlarını Aç", fontWeight = FontWeight.SemiBold, color = Color.Black)
                     }
                 }
 
                 // Bekleme yazısı
-                AnimatedVisibility(visible = nfcState == "waiting", enter = fadeIn(), exit = fadeOut()) {
-                    Text(
-                        "Kart bekleniyor...",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                val waitingAlpha by animateFloatAsState(
+                    targetValue = if (nfcState == "waiting") 1f else 0f,
+                    animationSpec = tween(300),
+                    label = "waiting_alpha"
+                )
+                Text(
+                    "Kart bekleniyor...",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer { alpha = waitingAlpha }
+                )
             }
         }
     }

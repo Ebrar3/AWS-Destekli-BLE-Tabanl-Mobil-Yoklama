@@ -15,14 +15,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.efecanseymen.b1.viewmodel.HomeViewModel
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+
 @Composable
 fun MainScreen(viewModel: HomeViewModel, onLogOutClick: () -> Unit){
     var selectedTab by remember { mutableStateOf(0) }
 
     val tabs = listOf(
         Triple("Ana Sayfa", Icons.Filled.Home, 0),
-        Triple("Yoklama", Icons.Filled.Nfc, 1),
-        Triple("Hangi Derslik", Icons.Filled.AssignmentTurnedIn, 2)
+        Triple("Yoklama", Icons.Filled.AssignmentTurnedIn, 1),
+        Triple("Hangi Derslik", Icons.Filled.Nfc, 2)
     )
 
     Scaffold(
@@ -41,20 +49,35 @@ fun MainScreen(viewModel: HomeViewModel, onLogOutClick: () -> Unit){
             }
         }
     ) { innerPadding ->
-        when (selectedTab) {
-            0 -> HomeScreen(
-                viewModel = viewModel,
-                onLogOutClick = onLogOutClick,
-                modifier = Modifier.padding(innerPadding)
-            )
-            1 -> ScanScreen(
-                viewModel = viewModel,
-                modifier = Modifier.padding(innerPadding)
-            )
-            2 -> ClassScreen(
-                viewModel = viewModel,
-                modifier = Modifier.padding(innerPadding)
-            )
+        AnimatedContent(
+            targetState = selectedTab,
+            transitionSpec = {
+                if (targetState > initialState) {
+                    slideInHorizontally(tween(300)) { width -> width } + fadeIn(tween(300)) togetherWith
+                            slideOutHorizontally(tween(300)) { width -> -width } + fadeOut(tween(300))
+                } else {
+                    slideInHorizontally(tween(300)) { width -> -width } + fadeIn(tween(300)) togetherWith
+                            slideOutHorizontally(tween(300)) { width -> width } + fadeOut(tween(300))
+                }
+            },
+            label = "nav_transition",
+            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+        ) { tab ->
+            when (tab) {
+                0 -> HomeScreen(
+                    viewModel = viewModel,
+                    onLogOutClick = onLogOutClick,
+                    modifier = Modifier
+                )
+                1 -> ScanScreen(
+                    viewModel = viewModel,
+                    modifier = Modifier
+                )
+                2 -> ClassScreen(
+                    viewModel = viewModel,
+                    modifier = Modifier
+                )
+            }
         }
     }
 }
